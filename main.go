@@ -12,23 +12,23 @@ import (
 )
 
 func main() {
+	// initially set webhook
 	err := utils.TelegramSetWebhook(fmt.Sprintf("https://%v:8443/message", os.Getenv("HOSTNAME")), os.Getenv("CERTIFICATE_FILE"))
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	// start background workers
 	go workers.TelegramResponder()
-
+	go workers.DataCrawler()
+	go workers.DataConverter()
+	// start main server
 	startApi()
 }
 
 func startApi() {
 	s := gin.Default()
 
-	mainController := new(controllers.MainController)
 	webhookController := new(controllers.WebhookController)
-
-	s.GET("/", mainController.GetIndex)
 
 	s.POST("/message", webhookController.PostMessage)
 
