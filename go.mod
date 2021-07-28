@@ -1,4 +1,4 @@
-module github.com/oltdaniel/rwth-coronabot
+module github.com/oltdaniel/rwthcorona-bot
 
 go 1.16
 

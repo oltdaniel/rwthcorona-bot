@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/oltdaniel/rwth-coronabot/controllers"
-	"github.com/oltdaniel/rwth-coronabot/utils"
-	"github.com/oltdaniel/rwth-coronabot/workers"
+	"github.com/oltdaniel/rwthcorona-bot/controllers"
+	"github.com/oltdaniel/rwthcorona-bot/utils"
+	"github.com/oltdaniel/rwthcorona-bot/workers"
 )
 
 func main() {

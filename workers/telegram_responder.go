@@ -3,7 +3,7 @@ package workers
 import (
 	"fmt"
 
-	"github.com/oltdaniel/rwth-coronabot/utils"
+	"github.com/oltdaniel/rwthcorona-bot/utils"
 )
 
 var TelegramResponderQueue chan (*utils.TelegramWebhookUpdate) = make(chan *utils.TelegramWebhookUpdate)

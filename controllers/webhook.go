@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/oltdaniel/rwth-coronabot/utils"
-	"github.com/oltdaniel/rwth-coronabot/workers"
+	"github.com/oltdaniel/rwthcorona-bot/utils"
+	"github.com/oltdaniel/rwthcorona-bot/workers"
 )
 
 type WebhookController Controller

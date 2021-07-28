@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/oltdaniel/rwth-coronabot/utils"
+	"github.com/oltdaniel/rwthcorona-bot/utils"
 )
 
 var DataConverterAnnouncement chan (string) = make(chan string)
