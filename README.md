@@ -27,8 +27,7 @@ Currently the data from the NRW Dashboard is used, only for _Aachen (Städteregi
     - [ ] Heat Map
 - [ ] Commands
     - [x] `/gestern`
-    - [ ] `/woche`
-    - [ ] `/altersgruppen`
+    - [x] `/altersgruppen`
 - [ ] Scheduling based on chat (_command to receive automatic updates_)
 
 ### License
