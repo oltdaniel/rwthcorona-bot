@@ -1,67 +1,38 @@
 package utils
 
 import (
-	"errors"
-	"fmt"
-	"sync"
-	"time"
+	"database/sql"
+	"log"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
-var DATASET = NewDatasetStore()
-
-type Dataset map[string]DatasetDay
-
-func (d *Dataset) Yesterday() (*DatasetDay, error) {
-	today := time.Now().AddDate(0, -1, 0).Format("2006-01-02")
-	fmt.Println(today)
-	if day, ok := (*d)[today]; ok {
-		return &day, nil
+var DATABASE *sql.DB = func() *sql.DB {
+	database, err := sql.Open("sqlite3", "./corona.db")
+	if err != nil {
+		log.Fatal(err)
 	}
-	return nil, errors.New("day missing")
+	err = ensureMigrations(database)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return database
+}()
+
+var migrations []string = []string{
+	"CREATE TABLE IF NOT EXISTS corona_data (tag DATE, plz INTEGER, label TEXT, altersgruppe TEXT, anzahlWoche INTEGER, rateWoche REAL, anteilWoche REAL, UNIQUE(tag, plz, altersgruppe))",
 }
 
-type DatasetDay map[string][]*DatasetEntry
-
-func (d *DatasetDay) Total() *DatasetEntry {
-	for group, v := range *d {
-		if group == "gesamt" {
-			if len(v) == 1 {
-				return v[0]
-			}
+func ensureMigrations(d *sql.DB) error {
+	for _, table := range migrations {
+		st, err := d.Prepare(table)
+		if err != nil {
+			return err
+		}
+		_, err = st.Exec()
+		if err != nil {
+			return err
 		}
 	}
 	return nil
-}
-
-type DatasetEntry struct {
-	AnzahlWoche  float64
-	RateWoche    float64
-	AnteiltWoche float64
-}
-
-type DatasetStore struct {
-	dataset *Dataset
-	lock    sync.Mutex
-}
-
-func NewDatasetStore() *DatasetStore {
-	datasetStore := &DatasetStore{
-		lock:    sync.Mutex{},
-		dataset: nil,
-	}
-	return datasetStore
-}
-
-func (d *DatasetStore) Get() *Dataset {
-	var dataset *Dataset
-	d.lock.Lock()
-	dataset = d.dataset
-	d.lock.Unlock()
-	return dataset
-}
-
-func (d *DatasetStore) Update(dataset *Dataset) {
-	d.lock.Lock()
-	d.dataset = dataset
-	d.lock.Unlock()
 }

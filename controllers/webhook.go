@@ -15,5 +15,5 @@ func (w *WebhookController) PostMessage(c *gin.Context) {
 		c.String(400, "something is wrong with that")
 	}
 	workers.TelegramResponderQueue <- &update
-	c.String(200, "all ok")
+	c.AbortWithStatus(200)
 }

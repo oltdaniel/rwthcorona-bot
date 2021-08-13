@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strings"
 )
 
 var TOKEN string = os.Getenv("TELEGRAM_TOKEN")
@@ -77,5 +79,13 @@ func TelegramSendMessage(message *TelegramRequestSendMessage) error {
 	if resp.StatusCode == 200 {
 		return nil
 	}
-	return errors.New("telegram.sendMessage failed")
+	b, _ := ioutil.ReadAll(resp.Body)
+	return errors.New(fmt.Sprintf("telegram.sendMessage failed: %v", string(b)))
+}
+
+func EscapeTelegramMessage(msg string) string {
+	for _, special := range []string{"(", ")", "-", "."} {
+		msg = strings.ReplaceAll(msg, special, "\\"+special)
+	}
+	return msg
 }
