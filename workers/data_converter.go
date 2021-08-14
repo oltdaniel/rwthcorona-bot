@@ -109,6 +109,11 @@ func handleAlterDataset(headers *[]string, data *[][]string) error {
 		return err
 	}
 	// iterate through each line
+	stm, err := utils.DATABASE.Prepare("INSERT OR IGNORE INTO corona_data(tag, plz, label, altersgruppe, anzahlWoche, rateWoche, anteilWoche) VALUES (?, ?, ?, ?, ?, ?, ?)")
+	defer stm.Close()
+	if err != nil {
+		return err
+	}
 	for _, v := range *data {
 		// get group details
 		date := v[dateIndex]
@@ -131,10 +136,6 @@ func handleAlterDataset(headers *[]string, data *[][]string) error {
 			return err
 		}
 		// append data
-		stm, err := utils.DATABASE.Prepare("INSERT OR IGNORE INTO corona_data(tag, plz, label, altersgruppe, anzahlWoche, rateWoche, anteilWoche) VALUES (?, ?, ?, ?, ?, ?, ?)")
-		if err != nil {
-			return err
-		}
 		// do it the stupid way, we only need to support these two
 		label := "Aachen"
 		if kreis == 5 {
@@ -186,6 +187,11 @@ func handleBaseDataset(headers *[]string, data *[][]string) error {
 		return err
 	}
 	// iterate through each line
+	stm, err := utils.DATABASE.Prepare("INSERT OR IGNORE INTO corona_data(tag, plz, label, altersgruppe, anzahlWoche, rateWoche, anteilWoche) VALUES (?, ?, ?, ?, ?, ?, ?)")
+	defer stm.Close()
+	if err != nil {
+		return err
+	}
 	for _, v := range *data {
 		// get group details
 		date := v[dateIndex]
@@ -203,10 +209,6 @@ func handleBaseDataset(headers *[]string, data *[][]string) error {
 			return err
 		}
 		// append data
-		stm, err := utils.DATABASE.Prepare("INSERT OR IGNORE INTO corona_data(tag, plz, label, altersgruppe, anzahlWoche, rateWoche, anteilWoche) VALUES (?, ?, ?, ?, ?, ?, ?)")
-		if err != nil {
-			return err
-		}
 		// do it the stupid way, we only need to support these two
 		label := "Aachen"
 		if kreis == 5 {

@@ -84,7 +84,7 @@ func TelegramSendMessage(message *TelegramRequestSendMessage) error {
 }
 
 func EscapeTelegramMessage(msg string) string {
-	for _, special := range []string{"(", ")", "-", "."} {
+	for _, special := range []string{"{", "}", "-", ".", "#", "=", "!", "|", ">"} {
 		msg = strings.ReplaceAll(msg, special, "\\"+special)
 	}
 	return msg

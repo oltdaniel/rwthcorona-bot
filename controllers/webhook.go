@@ -13,7 +13,8 @@ func (w *WebhookController) PostMessage(c *gin.Context) {
 	err := c.BindJSON(&update)
 	if err != nil {
 		c.String(400, "something is wrong with that")
+		return
 	}
-	workers.TelegramResponderQueue <- &update
 	c.AbortWithStatus(200)
+	workers.TelegramResponderQueue <- update
 }

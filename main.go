@@ -12,8 +12,6 @@ import (
 )
 
 func main() {
-	// ensure we close the db on exit
-	defer utils.DATABASE.Close()
 	// initially set webhook
 	err := utils.TelegramSetWebhook(fmt.Sprintf("https://%v:8443/message", os.Getenv("HOSTNAME")), os.Getenv("CERTIFICATE_FILE"))
 	if err != nil {

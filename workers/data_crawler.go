@@ -27,7 +27,7 @@ func DataCrawler() {
 	sched := clockwork.NewScheduler()
 
 	// structure allows crawling until new dataset is there
-	sched.Schedule().Every().Day().At("01:00").Do(crawlForNewDataset)
+	sched.Schedule().Every().Hour().Do(crawlForNewDataset)
 
 	// "manual" update
 	go func() {
@@ -56,8 +56,9 @@ func getFullDataFilepath(filename string) string {
 func crawlDataset(datasetType int, datasetUrl string) {
 	// create name and check if already exists
 	y, m, d := time.Now().AddDate(0, 0, -1).Date()
+	h := time.Now().Hour()
 	targetFilepath := getFullDataFilepath(
-		fmt.Sprintf("data.type%d.%02d-%02d-%02d.csv", datasetType, y, int(m), d))
+		fmt.Sprintf("data.type%d.%02d-%02d-%02d_%02d00.csv", datasetType, y, int(m), d, h))
 	if _, err := os.Stat(targetFilepath); os.IsExist(err) {
 		fmt.Println("Data already loaded")
 		return

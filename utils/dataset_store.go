@@ -8,7 +8,7 @@ import (
 )
 
 var DATABASE *sql.DB = func() *sql.DB {
-	database, err := sql.Open("sqlite3", "./corona.db")
+	database, err := sql.Open("sqlite3", "./corona.db?cache=shared&mode=memory")
 	if err != nil {
 		log.Fatal(err)
 	}
