@@ -3,12 +3,16 @@ package utils
 import (
 	"database/sql"
 	"log"
+	"os"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var DATA_BASE = os.Getenv("DATA_DIR")
+
 var DATABASE *sql.DB = func() *sql.DB {
-	database, err := sql.Open("sqlite3", "./corona.db?cache=shared&mode=memory")
+	database, err := sql.Open("sqlite3", filepath.Join(DATA_BASE, "/corona.db?cache=shared&mode=memory"))
 	if err != nil {
 		log.Fatal(err)
 	}
