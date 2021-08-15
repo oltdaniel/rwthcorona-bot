@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -104,121 +105,53 @@ func TelegramResponder() {
 				log.Println(err)
 			}
 		case strings.HasPrefix(msg, "/altersgruppe"):
-			commands := strings.SplitN(msg, " ", 2)
-			if len(commands) == 1 {
-				getAllAltersgruppen := func() ([]utils.TelegramReplyMarkupReplyKeyboardButton, error) {
-					rresp := []utils.TelegramReplyMarkupReplyKeyboardButton{}
-					r, err := stAllAltersgruppen.Query()
-					if err != nil {
-						return rresp, err
-					}
-					for r.Next() {
-						var (
-							altersgruppe string
-						)
-						err = r.Scan(&altersgruppe)
-						if err != nil {
-							return rresp, err
-						}
-						rresp = append(rresp, utils.TelegramReplyMarkupReplyKeyboardButton{Text: altersgruppe})
-					}
-					r.Close()
-					return rresp, nil
-				}
-				resp, err := getAllAltersgruppen()
+			getAllAltersgruppen := func() ([]utils.TelegramReplyMarkupReplyKeyboardButton, error) {
+				rresp := []utils.TelegramReplyMarkupReplyKeyboardButton{}
+				r, err := stAllAltersgruppen.Query()
 				if err != nil {
-					utils.TelegramSendMessage(&utils.TelegramRequestSendMessage{
-						ChatId:           update.Message.Chat.Id,
-						Text:             err.Error(),
-						ReplyToMessageId: update.Message.MessageId,
-					})
-					continue
-				}
-				buttons := [][]utils.TelegramReplyMarkupReplyKeyboardButton{}
-				index := -1
-				for i, v := range resp {
-					if i%4 == 0 {
-						index += 1
-						buttons = append(buttons, []utils.TelegramReplyMarkupReplyKeyboardButton{})
-					}
-					buttons[index] = append(buttons[index], v)
-				}
-				err = utils.TelegramSendMessage(&utils.TelegramRequestSendMessage{
-					ChatId:           update.Message.Chat.Id,
-					ReplyToMessageId: update.Message.MessageId,
-					Text:             "Wähle Altersgruppe:",
-					ReplyMarkup: utils.TelegramRequestSendMessageReplyMarkup{
-						Keyboard:        buttons,
-						OneTimeKeyboard: true,
-						Selective:       true,
-					},
-				})
-				if err != nil {
-					log.Println(err)
-				}
-				continue
-			}
-			if len(commands) != 2 {
-				err = utils.TelegramSendMessage(&utils.TelegramRequestSendMessage{
-					ChatId:           update.Message.Chat.Id,
-					Text:             "this is not allowed",
-					ReplyToMessageId: update.Message.MessageId,
-				})
-				if err != nil {
-					log.Println(err)
-				}
-				continue
-			}
-			altersgruppe := commands[1]
-			altersgruppe = strings.ReplaceAll(altersgruppe, "-", " - ")
-			altersgruppe = strings.ReplaceAll(altersgruppe, "+", " u. älter")
-			altersgruppe = strings.ReplaceAll(altersgruppe, "  ", " ")
-			getAltersgruppe := func(altersgruppe string) (string, error) {
-				rresp := ""
-				r, err := stAltersgruppe.Query(altersgruppe)
-				if err != nil {
-					return "", err
+					return rresp, err
 				}
 				for r.Next() {
 					var (
-						tag         string
-						label       string
-						anzahlWoche int64
-						rateWoche   float64
-						anteilWoche float64
+						altersgruppe string
 					)
-					err = r.Scan(&tag, &label, &anzahlWoche, &rateWoche, &anteilWoche)
+					err = r.Scan(&altersgruppe)
 					if err != nil {
-						return "", err
+						return rresp, err
 					}
-					lastUpdate := "unbekannt"
-					date, err := time.Parse("2006-01-02T15:04:05Z", tag)
-					if err == nil {
-						lastUpdate = date.Format("2006-01-02")
-					}
-					rresp += fmt.Sprintf("\n\n📌 *%v* _\\(`%v`\\)_\nAltersgruppe: `%v`\nAnzahl: `%d`\nIndzidenz: `%0.2f`", label, lastUpdate, altersgruppe, anzahlWoche, rateWoche)
+					rresp = append(rresp, utils.TelegramReplyMarkupReplyKeyboardButton{Text: altersgruppe})
 				}
 				r.Close()
-				rresp = utils.EscapeTelegramMessage(rresp)
 				return rresp, nil
 			}
-			resp, err := getAltersgruppe(altersgruppe)
+			resp, err := getAllAltersgruppen()
 			if err != nil {
-				err = utils.TelegramSendMessage(&utils.TelegramRequestSendMessage{
+				utils.TelegramSendMessage(&utils.TelegramRequestSendMessage{
 					ChatId:           update.Message.Chat.Id,
 					Text:             err.Error(),
 					ReplyToMessageId: update.Message.MessageId,
 				})
-				if err != nil {
-					log.Println(err)
-				}
 				continue
+			}
+			buttons := [][]utils.TelegramReplyMarkupReplyKeyboardButton{}
+			index := -1
+			for i, v := range resp {
+				if i%4 == 0 {
+					index += 1
+					buttons = append(buttons, []utils.TelegramReplyMarkupReplyKeyboardButton{})
+				}
+				buttons[index] = append(buttons[index], v)
 			}
 			err = utils.TelegramSendMessage(&utils.TelegramRequestSendMessage{
 				ChatId:           update.Message.Chat.Id,
-				Text:             resp,
 				ReplyToMessageId: update.Message.MessageId,
-				ParseMode:        "MarkdownV2",
+				Text:             "Wähle Altersgruppe:",
+				ReplyMarkup: utils.TelegramRequestSendMessageReplyMarkup{
+					Keyboard:        buttons,
+					OneTimeKeyboard: true,
+					Selective:       true,
+				},
+				DisableNotification: true,
 			})
 			if err != nil {
 				log.Println(err)
@@ -228,6 +161,21 @@ func TelegramResponder() {
 			altersgruppe = strings.ReplaceAll(altersgruppe, "-", " - ")
 			altersgruppe = strings.ReplaceAll(altersgruppe, "+", " u. älter")
 			altersgruppe = strings.ReplaceAll(altersgruppe, "  ", " ")
+			found1, err := regexp.MatchString("^([0-9]+)", altersgruppe)
+			if err != nil {
+				continue
+			}
+			found2, err := regexp.MatchString(" - ([0-9]+)$", altersgruppe)
+			if err != nil {
+				continue
+			}
+			found3, err := regexp.MatchString("u. älter$", altersgruppe)
+			if err != nil {
+				continue
+			}
+			if !(found1 && (found2 || found3)) {
+				continue
+			}
 			getAltersgruppe := func(altersgruppe string) (string, error) {
 				rresp := ""
 				r, err := stAltersgruppe.Query(altersgruppe)
@@ -278,10 +226,10 @@ func TelegramResponder() {
 			if err != nil {
 				log.Println(err)
 			}
-			if update.Message.ReplyToMessage.From.Username == TELEGRAM_USERNAME {
+			if update.Message.ReplyToMessage.Text == "Wähle Altersgruppe:" && update.Message.ReplyToMessage.From.Username == TELEGRAM_USERNAME {
 				err = utils.TelegramDeleteMessage(&utils.TelegramRequestDeleteMessage{
-					ChatId:    update.Message.ReplyToMessage.Chat.Id,
 					MessageId: update.Message.ReplyToMessage.MessageId,
+					ChatId:    update.Message.ReplyToMessage.Chat.Id,
 				})
 				if err != nil {
 					log.Println(err)
