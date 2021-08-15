@@ -24,6 +24,8 @@ var DATASETS = map[int]string{
 }
 
 func DataCrawler() {
+	crawlForNewDataset()
+
 	sched := clockwork.NewScheduler()
 
 	// structure allows crawling until new dataset is there

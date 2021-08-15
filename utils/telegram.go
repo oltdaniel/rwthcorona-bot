@@ -83,6 +83,29 @@ func TelegramSendMessage(message *TelegramRequestSendMessage) error {
 	return errors.New(fmt.Sprintf("telegram.sendMessage failed: %v", string(b)))
 }
 
+func TelegramDeleteMessage(message *TelegramRequestDeleteMessage) error {
+	// serialize message
+	body, err := json.Marshal(message)
+	if err != nil {
+		return err
+	}
+	// make request
+	req, err := http.NewRequest("POST", telegramApiUrl("deleteMessage"), bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode == 200 {
+		return nil
+	}
+	b, _ := ioutil.ReadAll(resp.Body)
+	return errors.New(fmt.Sprintf("telegram.deleteMessage failed: %v", string(b)))
+}
+
 func EscapeTelegramMessage(msg string) string {
 	for _, special := range []string{"{", "}", "-", ".", "#", "=", "!", "|", ">"} {
 		msg = strings.ReplaceAll(msg, special, "\\"+special)

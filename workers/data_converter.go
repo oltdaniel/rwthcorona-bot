@@ -21,7 +21,6 @@ var DataConverterAnnouncement chan (DataConverterUpdate) = make(chan DataConvert
 func DataConverter() {
 	for {
 		newDataset := <-DataConverterAnnouncement
-		fmt.Println(newDataset)
 
 		fp, err := os.Open(newDataset.DatasetPath)
 		if err != nil {

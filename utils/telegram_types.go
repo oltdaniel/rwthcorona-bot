@@ -51,3 +51,8 @@ type TelegramRequestSendMessageReplyMarkup struct {
 type TelegramReplyMarkupReplyKeyboardButton struct {
 	Text string `json:"text"`
 }
+
+type TelegramRequestDeleteMessage struct {
+	ChatId    int64 `json:"chat_id"`
+	MessageId int64 `json:"message_id"`
+}

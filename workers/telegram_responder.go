@@ -40,12 +40,11 @@ func TelegramResponder() {
 				continue
 			}
 		}
-		log.Println(update)
 		switch {
 		case msg == "/info":
 			err := utils.TelegramSendMessage(&utils.TelegramRequestSendMessage{
 				ChatId:           update.Message.Chat.Id,
-				Text:             utils.EscapeTelegramMessage("🦠 @RWTHcorona\\_bot \nIch kann nur Nachrichten lesen die mit `/` starten, Antworten auf meine Nachrichten \\(auch geschachtelte Antworten\\) und Benachrichtigungen zu z.B. angepinnten Nachrichten.\n\nJede Nachricht die ich somit erreiche, werde ich temporär bearbeiten. Wenn ich fertig bin ,verschwindet alles.\n\nSpeziell in Gruppen verlange ich, dass die Kommandos auf meinen Benutzernamen enden. Dies passiert automatisch wenn mehrere Bots in der Gruppe sind. Zusätzlich ermögliche ich die Benutzung vomMarkup Keyboard, worüber die Altersgruppen ausgewählt werden.\n\n📫 *Datenschutz*\nIch speichere nichts über dich. Die gesendeten Chatverläufe sind aber natürlich bei Telegram entsprechend gespeichert.\n\n📂 *Datenquelle*\nDie Daten werden von dem [Land NRW](https://www.lzg.nrw.de/covid19/covid19_mags.html) bezogen und stündlich von uns auf Updates überprüft."),
+				Text:             utils.EscapeTelegramMessage("🦠 @RWTHcorona\\_bot \nIch kann nur Nachrichten lesen die mit `/` starten, Antworten auf meine Nachrichten \\(auch geschachtelte Antworten\\) und Benachrichtigungen zu z.B. angepinnten Nachrichten.\n\nJede Nachricht die mich somit erreicht, werde ich temporär bearbeiten. Wenn ich fertig bin, verschwindet alles.\n\nSpeziell in Gruppen verlange ich, dass die Kommandos auf meinen Benutzernamen enden. Dies passiert automatisch wenn mehrere Bots in der Gruppe sind. Zusätzlich ermögliche ich die Benutzung vomMarkup Keyboard, worüber die Altersgruppen ausgewählt werden.\n\n📫 *Datenschutz*\nIch speichere nichts über dich. Die gesendeten Chatverläufe sind aber natürlich bei Telegram entsprechend gespeichert.\n\n📂 *Datenquelle*\nDie Daten werden von dem [Land NRW](https://www.lzg.nrw.de/covid19/covid19_mags.html) bezogen und stündlich von uns auf Updates überprüft. Da es nu rein Update pro tag gibt, wird nur das Datum der Daten angegeben."),
 				ReplyToMessageId: update.Message.MessageId,
 				ParseMode:        "MarkdownV2",
 			})
@@ -278,6 +277,15 @@ func TelegramResponder() {
 			})
 			if err != nil {
 				log.Println(err)
+			}
+			if update.Message.ReplyToMessage.From.Username == TELEGRAM_USERNAME {
+				err = utils.TelegramDeleteMessage(&utils.TelegramRequestDeleteMessage{
+					ChatId:    update.Message.ReplyToMessage.Chat.Id,
+					MessageId: update.Message.ReplyToMessage.MessageId,
+				})
+				if err != nil {
+					log.Println(err)
+				}
 			}
 		}
 	}
